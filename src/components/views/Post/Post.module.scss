@@ -1,4 +1,37 @@
 @import '../../../styles/settings.scss';
 
-// .root {
-// }
+.root {
+  .component {
+    .buttonMore {
+      background-color: $color-buttonMore;
+      margin-left: 170px;
+    }
+    .photoWrapper {
+      height: 250px;
+      position: relative;
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+    .linkWrapper {
+      display: flex;
+
+      a {
+        text-decoration: none;
+        margin: 0 auto;
+          &:hover {
+          text-decoration: none;
+        }
+      }
+      .buttonEdit {
+        background-color: $color-green;
+        &:hover {
+          filter: brightness(90%);
+        }
+      }
+
+    }
+  }
+}

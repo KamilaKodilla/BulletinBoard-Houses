@@ -1,4 +1,10 @@
 @import '../../../styles/settings.scss';
 
-// .root {
-// }
+.root {
+  .submit{
+      background-color: $color-green;
+      &:hover {
+        filter: brightness(110%);
+       }
+  }
+}
