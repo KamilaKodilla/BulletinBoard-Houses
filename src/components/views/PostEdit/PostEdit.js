@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import clsx from 'clsx';
 
 import { connect } from 'react-redux';
-import { getStatus } from '../../../redux/usersRedux.js';
-import { editPost, getPostById } from '../../../redux/postsRedux.js';
+import { getStatus } from '../../../redux/userSwitcherRedux.js';
+import { editPostRequest, getOne, fetchOnePostFromAPI } from '../../../redux/postsRedux.js';
 
 import styles from './PostEdit.module.scss';
 
@@ -24,47 +24,33 @@ import { NotFound } from '../NotFound/NotFound.js';
 
 class Component extends React.Component {
   state = {
-    post: {
-      id: '',
-      author: '',
-      created: '',
-      updated: '',
-      status: '',
-      title: '',
-      text: '',
-      photo: '',
-      price: '',
-      phone: '',
-      location: '',
-    },
+    post: {},
     error: null,
   };
 
-  componentWillMount() {
-    const { postToEdit } = this.props;
-    const { post } = this.state;
+  componentDidMount() {
+    const { fetchPost, postToEdit } = this.props;
+    fetchPost();
     this.setState({
-      post: {
-        ...post,
-        id: postToEdit.id,
-        author: postToEdit.author,
-        created: postToEdit.created,
-        updated: postToEdit.updated,
-        status: postToEdit.status,
-        title: postToEdit.title,
-        text: postToEdit.text,
-        photo: postToEdit.photo,
-        price: postToEdit.price,
-        phone: postToEdit.phone,
-        location: postToEdit.location,
-      },
+      post: { ...postToEdit },
     });
   }
+
+  componentDidUpdate(prevProps) {
+    const { fetchPost, postToEdit } = this.props;
+    if (postToEdit === {} || postToEdit._id !== prevProps.postToEdit._id) {
+      fetchPost();
+      this.setState({
+        post: { ...postToEdit },
+      });
+    }
+  }
+
   setPhoto = (files) => {
     const { post } = this.state;
 
-    if (files) this.setState({ post: { ...post, photo: files[0] } });
-    else this.setState({ post: { ...post, file: null } });
+    if (files) this.setState({ post: { ...post, photo: files[0].name } });
+    else this.setState({ post: { ...post, photo: null } });
   };
 
   handleChange = (event) => {
@@ -81,7 +67,9 @@ class Component extends React.Component {
     e.preventDefault();
 
     let error = null;
-    const emailPattern = /\S+@\S+\.\S+/;
+    const emailPattern = new RegExp(
+      '^[a-zA-Z0-9][a-zA-Z0-9_.-]+@[a-zA-Z0-9][a-zA-Z0-9_.-]+.{1,3}[a-zA-Z]{2,4}'
+    );
 
     if (post.title.length < 10) {
       alert('The title is too short');
@@ -94,15 +82,13 @@ class Component extends React.Component {
       error = 'wrong email';
     }
     if (!error) {
-      post.created = new Date().toISOString();
-      post.updated = post.created;
-      post.id = Math.random().toString(36).substr(2, 5);
+      post.updated = new Date().toISOString();
 
       updatePost(post);
 
       this.setState({
         post: {
-          id: '',
+          _id: '',
           author: '',
           created: '',
           updated: '',
@@ -139,7 +125,7 @@ class Component extends React.Component {
                       label="Title"
                       variant="filled"
                       onChange={this.handleChange}
-                      defaultValue={post.title}
+                      value={post.title}
                       helperText="min. 10 characters"
                       fullWidth
                     />
@@ -151,7 +137,7 @@ class Component extends React.Component {
                       label="Give the full description!"
                       variant="filled"
                       onChange={this.handleChange}
-                      defaultValue={post.text}
+                      value={post.text}
                       helperText="min. 20 characters"
                       fullWidth
                       multiline
@@ -164,7 +150,7 @@ class Component extends React.Component {
                       label="Your Email"
                       variant="filled"
                       onChange={this.handleChange}
-                      defaultValue={post.author}
+                      value={post.author}
                       helperText="Put your valid email"
                       fullWidth
                     />
@@ -176,7 +162,7 @@ class Component extends React.Component {
                       label="Location"
                       variant="filled"
                       onChange={this.handleChange}
-                      defaultValue={post.location}
+                      value={post.location}
                       helperText="Location"
                       fullWidth
                     />
@@ -188,7 +174,7 @@ class Component extends React.Component {
                       label="Price"
                       variant="filled"
                       onChange={this.handleChange}
-                      defaultValue={post.price}
+                      value={post.price}
                       helperText="Price in EUR"
                       fullWidth
                     />
@@ -200,8 +186,8 @@ class Component extends React.Component {
                       label="Phone number"
                       variant="filled"
                       onChange={this.handleChange}
-                      defaultValue={post.phone}
-                      helperText="Give you contact number"
+                      value={post.phone}
+                      helperText="Give your contact number"
                       fullWidth
                     />
                   </Grid>
@@ -215,7 +201,6 @@ class Component extends React.Component {
                         fullWidth
                         variant="filled"
                         name="status"
-                        defaultValue={post.status}
                         value={post.status}
                       >
                         <MenuItem value="draft">draft</MenuItem>
@@ -261,13 +246,14 @@ Component.propTypes = {
   postToEdit: PropTypes.object,
 };
 
-const mapStateToProps = (state, props) => ({
+const mapStateToProps = (state) => ({
   userStatus: getStatus(state),
-  postToEdit: getPostById(state, props.match.params.id),
+  postToEdit: getOne(state),
 });
 
-const mapDispatchToProps = (dispatch) => ({
-  updatePost: (post) => dispatch(editPost(post)),
+const mapDispatchToProps = (dispatch, props) => ({
+  updatePost: (post) => dispatch(editPostRequest(post)),
+  fetchPost: () => dispatch(fetchOnePostFromAPI(props.match.params.id)),
 });
 
 const Container = connect(mapStateToProps, mapDispatchToProps)(Component);

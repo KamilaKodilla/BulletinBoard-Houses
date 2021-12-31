@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "run-p start:* ",
+    "start:backend": "nodemon backend/server.js ",
     "start-silent": "run-p start > /dev/null",
     "start:react": "react-scripts start",
     "start-and-test": "run-p start-silent test ",
@@ -58,7 +59,8 @@
     "react-scripts": "3.2.0",
     "react-test-renderer": "^16.12.0",
     "redux": "^4.0.4",
-    "redux-thunk": "^2.3.0"
+    "redux-thunk": "^2.3.0",
+    "uniqid": "^5.4.0"
   },
   "devDependencies": {
     "husky": "^3.1.0",

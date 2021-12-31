@@ -1,8 +1,12 @@
+import Axios from 'axios';
+
 /* selectors */
+export const getOne = ({posts}) => posts.onePost;
 export const getAll = ({posts}) => posts.data;
-export const getPostById = ({ posts }, id) => {
-  return posts.data.filter((post) => post.id === id)[0];
+export const getPostById = ({ posts }, _id) => {
+  return posts.data.filter((post) => post._id === _id)[0];
 };
+export const getLoadingState = ({ posts }) => posts.loading;
 
 /* action name creator */
 const reducerName = 'posts';
@@ -14,6 +18,7 @@ const FETCH_SUCCESS = createActionName('FETCH_SUCCESS');
 const FETCH_ERROR = createActionName('FETCH_ERROR');
 const ADD_POST = createActionName('ADD_POST');
 const EDIT_POST = createActionName('EDIT_POST');
+const FETCH_ONE_POST = createActionName('FETCH_ONE_POST');
 
 /* action creators */
 export const fetchStarted = payload => ({ payload, type: FETCH_START });
@@ -21,7 +26,63 @@ export const fetchSuccess = payload => ({ payload, type: FETCH_SUCCESS });
 export const fetchError = payload => ({ payload, type: FETCH_ERROR });
 export const addPost = (payload) => ({ payload, type: ADD_POST });
 export const editPost = (payload) => ({ payload, type: EDIT_POST });
+export const fetchOnePost = (payload) => ({ payload, type: FETCH_ONE_POST});
+
 /* thunk creators */
+export const fetchPublished = () => {
+  return (dispatch, getState) => {
+    const { posts } = getState();
+
+    if (posts.data.length === 0 || posts.loading.active === 'false') {
+      dispatch(fetchStarted());
+      Axios.get('http://localhost:8000/api/posts')
+        .then((res) => {
+          dispatch(fetchSuccess(res.data));
+        })
+        .catch((err) => {
+          dispatch(fetchError(err.message || true));
+        });
+    }
+  };
+};
+
+export const fetchOnePostFromAPI = (_id) => {
+  return (dispatch, getState) => {
+    dispatch(fetchStarted());
+    Axios.get(`http://localhost:8000/api/posts/${_id}`)
+      .then((res) => {
+        dispatch(fetchOnePost(res.data));
+      })
+      .catch((err) => {
+        dispatch(fetchError(err.message || true));
+      });
+  };
+};
+export const addPostRequest = (data) => {
+  return (dispatch) => {
+    dispatch(fetchStarted());
+    Axios.post('http://localhost:8000/api/posts/add', data)
+      .then((res) => {
+        dispatch(addPost(data));
+      })
+      .catch((err) => {
+        dispatch(fetchError(err.message || true));
+      });
+  };
+};
+
+export const editPostRequest = (data) => {
+  return async (dispatch) => {
+    dispatch(fetchStarted());
+    Axios.put(`http://localhost:8000/api/posts/${data._id}/edit`, data)
+      .then((res) => {
+        dispatch(editPost(data));
+      })
+      .catch((err) => {
+        dispatch(fetchError(err.message || true));
+      });
+  };
+};
 
 /* reducer */
 export const reducer = (statePart = [], action = {}) => {
@@ -65,9 +126,19 @@ export const reducer = (statePart = [], action = {}) => {
         ...statePart,
         data: [
           ...statePart.data.map((post) =>
-            post.id === action.payload.id ? action.payload : post
+            post._id === action.payload._id ? action.payload : post
           ),
         ],
+      };
+    }
+    case FETCH_ONE_POST: {
+      return {
+        ...statePart,
+        loading: {
+          active: false,
+          error: false,
+        },
+        onePost: action.payload,
       };
     }
 

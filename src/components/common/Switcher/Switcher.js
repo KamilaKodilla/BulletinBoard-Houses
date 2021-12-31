@@ -6,25 +6,19 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 
 import { connect } from 'react-redux';
-import { getUserStatus } from '../../redux/usersRedux';
+import { getUserStatus } from '../../../redux/userSwitcherRedux';
 
 class Component extends React.Component {
-  state = {
-    user: {
-      active: true,
-    },
-  };
 
   handleOnChange = (event) => {
-    const { getUserStatus } = this.props;
-    const { user } = this.state;
+    const { getUserStatus, user } = this.props;
 
     if (event === 'true') {
       user.active = true;
-      getUserStatus(user);
+      getUserStatus(true);
     } else {
       user.active = false;
-      getUserStatus(user);
+      getUserStatus(false);
     }
   };
   render() {
@@ -53,7 +47,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  getUserStatus: (user) => dispatch(getUserStatus(user)),
+  getUserStatus: (status) => dispatch(getUserStatus(status)),
 });
 
 const Container = connect(mapStateToProps, mapDispatchToProps)(Component);

@@ -1,8 +1,8 @@
 export const initialState = {
   posts: {
     data: [
-      {
-        id: '1',
+      /*{
+        _id: '1',
         author: 'admin@onet.pl',
         created: '2021-12-20',
         updated: '2021-12-20',
@@ -16,7 +16,7 @@ export const initialState = {
         location: 'Warsaw',
       },
       {
-        id: '2',
+        _id: '2',
         author: 'user1@gmail.com',
         created: '2021-12-21',
         updated: '2021-12-21',
@@ -30,7 +30,7 @@ export const initialState = {
         location: 'Gdynia',
       },
       {
-        id: '3',
+        _id: '3',
         author: 'user2@gmail.com',
         created: '2021-12-22',
         updated: '2021-12-22',
@@ -44,7 +44,7 @@ export const initialState = {
         location: 'Kraków',
       },
       {
-        id: '4',
+        _id: '4',
         author: 'user3@gmail.com',
         created: '2021-12-22',
         updated: '2021-12-22',
@@ -56,11 +56,17 @@ export const initialState = {
         price: 4500000,
         phone: '599499399',
         location: 'Mrągowo',
-      },
+      },*/
     ],
     loading: {
       active: false,
       error: false,
     },
+  },
+  users: {
+    data: [],
+  },
+  user: {
+    active: true,
   },
 };

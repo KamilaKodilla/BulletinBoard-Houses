@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import clsx from 'clsx';
 
 import { connect } from 'react-redux';
-import { getStatus } from '../../../redux/usersRedux';
-import { addPost } from '../../../redux/postsRedux';
+import { getStatus } from '../../../redux/userSwitcherRedux';
+import { addPostRequest } from '../../../redux/postsRedux';
 import { NotFound } from '../NotFound/NotFound';
 
 import styles from './PostAdd.module.scss';
@@ -25,7 +25,6 @@ import ImageUploader from 'react-images-upload';
 class Component extends React.Component {
   state = {
     post: {
-      id: '',
       author: '',
       created: '',
       updated: '',
@@ -37,13 +36,13 @@ class Component extends React.Component {
       phone: '',
       location: '',
     },
-    error: null,
   };
+
   setPhoto = (files) => {
     const { post } = this.state;
 
-    if (files) this.setState({ post: { ...post, photo: files[0] } });
-    else this.setState({ post: { ...post, file: null } });
+    if (files) this.setState({ post: { ...post, photo: files[0].name } });
+    else this.setState({ post: { ...post, photo: null } });
   };
 
   handleChange = (event) => {
@@ -60,7 +59,9 @@ class Component extends React.Component {
     e.preventDefault();
 
     let error = null;
-    const emailPattern = /\S+@\S+\.\S+/;
+    const emailPattern = new RegExp(
+      '^[a-zA-Z0-9][a-zA-Z0-9_.-]+@[a-zA-Z0-9][a-zA-Z0-9_.-]+.{1,3}[a-zA-Z]{2,4}'
+    );
 
     if (post.title.length < 10) {
       alert('The title is too short');
@@ -75,31 +76,16 @@ class Component extends React.Component {
     if (!error ) {
       post.created = new Date().toISOString();
       post.updated = post.created;
-      post.id = Math.random().toString(36).substr(2, 5);
 
       addNewPost(post);
       console.log('add', addNewPost(post));
 
-      this.setState({
-        post: {
-          id: '',
-          author: '',
-          created: '',
-          updated: '',
-          status: '',
-          title: '',
-          text: '',
-          photo: '',
-          price: '',
-          phone: '',
-          location: '',
-        },
-      });
       alert('Thank you for your add!');
     } else {
-      alert('Please correct errors before submitting your add!');
+      alert('Please correct errors!');
     }
   };
+
   render() {
     const { className, userStatus } = this.props;
     const { post } = this.state;
@@ -178,7 +164,7 @@ class Component extends React.Component {
                       label="Phone number"
                       variant="filled"
                       onChange={this.handleChange}
-                      helperText="Give you contact number"
+                      helperText="Give your contact number"
                       fullWidth
                     />
                   </Grid>
@@ -242,7 +228,7 @@ const mapStateToProps = (state) => ({
 
 
 const mapDispatchToProps = (dispatch) => ({
-  addNewPost: (post) => dispatch(addPost(post)),
+  addNewPost: (post) => dispatch(addPostRequest(post)),
 });
 
 const Container = connect(mapStateToProps, mapDispatchToProps)(Component);
